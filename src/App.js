@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import MemoryCard from "./components/MemoryCard";
+import Counter from "./components/Counter";
 
 function App() {
   const [allTeamsLogos, setAllTeamsLogos] = useState([]);
@@ -7,6 +8,9 @@ function App() {
   const [isLogosLoaded, setIsLogosLoaded] = useState(false);
   const [pickedLogos, setPickedLogos] = useState([]);
   const [numberOfLogosPresented, setNumberOfLogosPresented] = useState(0);
+  const [isPlayerFailed, setIsPlayerFailed] = useState(false);
+  const [maxScore, setMaxScore] = useState(0);
+  const [playerScore, setPlayerScore] = useState(0);
   useEffect(() => {
     fetch(
       "https://www.thesportsdb.com/api/v1/json/1/search_all_teams.php?l=UEFA_Champions_League"
@@ -56,18 +60,8 @@ function App() {
   useEffect(() => {
     //This is creating next level of logos after selecting all logos correctly
     setNewPresentedLogosArr();
+    setPickedLogos([]);
   }, [numberOfLogosPresented]);
-
-  const handlePickedLogos = (event) => {
-    const { dataset } = event.target;
-    const logoId = dataset.id;
-    const newPickedLogo = presentedLogos.find((elem) => {
-      return logoId === elem.teamId;
-    });
-    setPickedLogos((prevState) => {
-      return [...prevState, newPickedLogo];
-    });
-  };
 
   useEffect(() => {
     if (pickedLogos.length === numberOfLogosPresented) {
@@ -77,8 +71,30 @@ function App() {
         return numberOfNextLevelLogos;
       });
       setPickedLogos([]);
+    } else if (isPlayerFailed) {
+      setNumberOfLogosPresented(4);
+      setIsPlayerFailed(false);
     }
-  }, [pickedLogos.length]);
+  }, [playerScore]);
+  const handlePickedLogos = (event) => {
+    const { dataset } = event.currentTarget;
+    const logoId = dataset.id;
+    const newPickedLogo = presentedLogos.find((elem) => {
+      return logoId === elem.teamId;
+    });
+    let isItClickedBefore = pickedLogos.includes(newPickedLogo);
+    setIsPlayerFailed(isItClickedBefore);
+    let newPickedLogoArr;
+    if (isItClickedBefore) {
+      newPickedLogoArr = [];
+      setMaxScore(playerScore);
+      setPlayerScore(0);
+    } else {
+      newPickedLogoArr = [...pickedLogos, newPickedLogo];
+      setPlayerScore((prevState) => prevState + 1);
+    }
+    setPickedLogos(newPickedLogoArr);
+  };
 
   const createPlaceholderLogos = () => {
     const placeHolderLogos = [];
@@ -105,6 +121,7 @@ function App() {
           teamLogo={elem.teamLogo}
           teamId={elem.teamId}
           teamName={elem.teamName}
+          handlePickedLogos={handlePickedLogos}
         />
       );
     });
@@ -113,6 +130,9 @@ function App() {
 
   return (
     <div className="App">
+      <header>
+        <Counter playerScore={playerScore} maxScore={maxScore} />
+      </header>
       {isLogosLoaded ? createMemoryCardArray() : createPlaceholderLogos()}
     </div>
   );
