@@ -4,7 +4,7 @@ import Counter from "./components/Counter";
 
 function App() {
   const [allTeamsLogos, setAllTeamsLogos] = useState([]);
-  const [presentedLogos, setPresentedLogos] = useState([]);
+  const [shownLogos, setShownLogos] = useState([]);
   const [isLogosLoaded, setIsLogosLoaded] = useState(false);
   const [pickedLogos, setPickedLogos] = useState([]);
   const [numberOfLogosPresented, setNumberOfLogosPresented] = useState(0);
@@ -32,7 +32,7 @@ function App() {
         setAllTeamsLogos(teamInfo);
         setNumberOfLogosPresented(4);
         setIsLogosLoaded(true);
-        setNewPresentedLogosArr();
+        setNewShownLogosArr();
       });
   }, []);
   const shuffle = (array) => {
@@ -42,24 +42,24 @@ function App() {
   };
   useEffect(() => {
     //This is shuffling current round logos every time on a click of an image
-    if (presentedLogos.length >= 4) {
-      const newpresentedLogos = shuffle(presentedLogos);
-      setPresentedLogos(newpresentedLogos);
+    if (shownLogos.length >= 4) {
+      const newshownLogos = shuffle(shownLogos);
+      setShownLogos(newshownLogos);
     }
   }, [pickedLogos.length]);
-  const setNewPresentedLogosArr = () => {
+  const setNewShownLogosArr = () => {
     if (numberOfLogosPresented > 0) {
       const allTeamsLogosShuffled = shuffle(allTeamsLogos);
-      const newPresentedLogosArr = allTeamsLogosShuffled.slice(
+      const newshownLogosArr = allTeamsLogosShuffled.slice(
         0,
         numberOfLogosPresented
       );
-      setPresentedLogos(newPresentedLogosArr);
+      setShownLogos(newshownLogosArr);
     }
   };
   useEffect(() => {
     //This is creating next level of logos after selecting all logos correctly
-    setNewPresentedLogosArr();
+    setNewShownLogosArr();
     setPickedLogos([]);
   }, [numberOfLogosPresented]);
 
@@ -79,7 +79,7 @@ function App() {
   const handlePickedLogos = (event) => {
     const { dataset } = event.currentTarget;
     const logoId = dataset.id;
-    const newPickedLogo = presentedLogos.find((elem) => {
+    const newPickedLogo = shownLogos.find((elem) => {
       return logoId === elem.teamId;
     });
     let isItClickedBefore = pickedLogos.includes(newPickedLogo);
@@ -87,7 +87,9 @@ function App() {
     let newPickedLogoArr;
     if (isItClickedBefore) {
       newPickedLogoArr = [];
-      setMaxScore(playerScore);
+      if (playerScore > maxScore) {
+        setMaxScore(playerScore);
+      }
       setPlayerScore(0);
     } else {
       newPickedLogoArr = [...pickedLogos, newPickedLogo];
@@ -114,7 +116,7 @@ function App() {
   };
   let memoryCardArray = [];
   const createMemoryCardArray = () => {
-    memoryCardArray = presentedLogos.map((elem, index) => {
+    memoryCardArray = shownLogos.map((elem, index) => {
       return (
         <MemoryCard
           key={index}
