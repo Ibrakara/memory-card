@@ -7,9 +7,13 @@ function MemoryCard(props) {
   const handlePickedLogos = props.handlePickedLogos;
 
   return (
-    <div data-id={teamLogoImgID} onClick={handlePickedLogos}>
-      <img src={teamLogoImgSrc} alt="team logo" width="100" />
-      <p>{teamName}</p>
+    <div
+      className="img-div"
+      data-id={teamLogoImgID}
+      onClick={handlePickedLogos}
+    >
+      <img src={teamLogoImgSrc} alt="team logo" className="img" />
+      <p id="team-name">{teamName}</p>
     </div>
   );
 }

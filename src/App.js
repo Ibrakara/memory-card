@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import MemoryCard from "./components/MemoryCard";
 import Counter from "./components/Counter";
 
+import themeSong from "./styles/sounds/UCL_theme.mp3";
+
 function App() {
   const [allTeamsLogos, setAllTeamsLogos] = useState([]);
   const [shownLogos, setShownLogos] = useState([]);
@@ -55,12 +57,16 @@ function App() {
         numberOfLogosPresented
       );
       setShownLogos(newshownLogosArr);
+      setIsLogosLoaded(false);
     }
   };
   useEffect(() => {
     //This is creating next level of logos after selecting all logos correctly
     setNewShownLogosArr();
     setPickedLogos([]);
+    setTimeout(() => {
+      setIsLogosLoaded(true);
+    }, 1000);
   }, [numberOfLogosPresented]);
 
   useEffect(() => {
@@ -76,6 +82,14 @@ function App() {
       setIsPlayerFailed(false);
     }
   }, [playerScore]);
+  useEffect(() => {
+    const newAudio = new Audio(themeSong);
+    newAudio.volume = 0.05;
+    newAudio.loop = true;
+    setTimeout(() => {
+      newAudio.play();
+    }, 4000);
+  }, []);
   const handlePickedLogos = (event) => {
     const { dataset } = event.currentTarget;
     const logoId = dataset.id;
@@ -100,16 +114,21 @@ function App() {
 
   const createPlaceholderLogos = () => {
     const placeHolderLogos = [];
-    for (let i = 0; i < 4; i++) {
+    let numberOfPresentedPlaceholders;
+    numberOfLogosPresented === 0
+      ? (numberOfPresentedPlaceholders = 4)
+      : (numberOfPresentedPlaceholders = numberOfLogosPresented);
+    for (let i = 0; i < numberOfPresentedPlaceholders; i++) {
       placeHolderLogos.push(
-        <img
-          key={i}
-          src="http://www.yeksun.com.tr/images/download.gif"
-          width="100"
-          height="100"
-          frameBorder="0"
-          alt="placeholder gif"
-        />
+        <div className="img-div" key={i}>
+          <img
+            src="http://www.yeksun.com.tr/images/download.gif"
+            width="100"
+            height="auto"
+            frameBorder="0"
+            alt="placeholder gif"
+          />
+        </div>
       );
     }
     return placeHolderLogos;
@@ -132,10 +151,10 @@ function App() {
 
   return (
     <div className="App">
-      <header>
-        <Counter playerScore={playerScore} maxScore={maxScore} />
-      </header>
-      {isLogosLoaded ? createMemoryCardArray() : createPlaceholderLogos()}
+      <Counter playerScore={playerScore} maxScore={maxScore} />
+      <div className="img-container">
+        {isLogosLoaded ? createMemoryCardArray() : createPlaceholderLogos()}
+      </div>
     </div>
   );
 }
